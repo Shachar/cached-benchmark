@@ -1,0 +1,54 @@
+#!/usr/bin/python3
+
+import sys
+
+num_functions = int(sys.argv[1])
+alignment = int(sys.argv[2])
+
+with open("parameters.mk", "w") as parameters_file:
+    print("# Auto generated file. DO NOT EDIT\n\n", file=parameters_file)
+
+    print("benchmark: \\", file=parameters_file)
+    for i in range(num_functions):
+        print(f"    function_{i}.o", file=parameters_file, end='')
+        if i+1<num_functions:
+            print(" \\", file=parameters_file)
+        else:
+            print("", file=parameters_file)
+
+with open("function.h", "w") as funcref_file:
+    print(
+f"""// Auto generated file. DO NOT EDIT
+
+#pragma once
+
+#include <stdint.h>
+#include <stddef.h>
+
+class Class {{
+}};
+
+constexpr size_t NumFunctions = {num_functions};
+
+typedef uint64_t (*benchmark_func)(uint64_t, Class *);
+extern const benchmark_func functions[NumFunctions];
+
+""",
+        end='', file=funcref_file)
+    for i in range(num_functions):
+        print(f"extern uint64_t benchmark_function_{i}(uint64_t run_num, Class *cls);", file=funcref_file)
+
+with open("funcref.cpp", "w") as funcref_file:
+    print(
+"""// Auto generated file. DO NOT EDIT
+
+#include "function.h"
+
+const benchmark_func functions[NumFunctions] = {
+""",
+        end='', file=funcref_file)
+
+    for i in range(num_functions):
+        print(f"  benchmark_function_{i},", file=funcref_file)
+
+    print("};", file=funcref_file)

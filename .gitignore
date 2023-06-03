@@ -1,1 +1,7 @@
 .*.swp
+function_*.cpp
+*.o
+benchmark
+parameters.mk
+/funcref.cpp
+/function.h
