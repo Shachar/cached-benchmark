@@ -1,8 +1,7 @@
 NUM_FUNCTIONS=16
 FUNC_ALIGNMENT=128
 
-CXXFLAGS=-Wall -O2 -g
-LDFLAGS=-Wall -g
+CXXFLAGS=-Wall -O2 -g -std=c++20
 LD=$(CXX)
 CC=$(CXX)
 
