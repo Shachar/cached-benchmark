@@ -10,9 +10,11 @@ public:
     virtual uint64_t method(uint64_t num) = 0;
 };
 
+constexpr uint64_t values[16] = { 0x3d, 0x2f, 0x09, 0xf5, 0xeb, 0xdf, 0xe9, 0x6a, 0x7d, 0xa4, 0x94, 0x66, 0x35, 0x65, 0x9c, 0x27  };
+
 #define VCLS(n) class Virtual##n : public Base { \
 public: \
-        uint64_t method(uint64_t num) final { return num+n; } \
+        uint64_t method(uint64_t num) final { return num * values[n]; } \
 }
 
 VCLS(0);
@@ -32,7 +34,7 @@ VCLS(13);
 VCLS(14);
 VCLS(15);
 
-#define CONCRETE(n) uint64_t concrete##n(uint64_t num) {  return num+n; }
+#define CONCRETE(n) uint64_t concrete##n(uint64_t num) {  return num * values[n]; }
 
 CONCRETE(0)
 CONCRETE(1)
@@ -75,12 +77,12 @@ std::unique_ptr<Base> alloc( uint32_t type ) {
     abort();
 }
 
-int main() {
-    static constexpr size_t NumFunctions = 2048;
-    static constexpr size_t NumIterations = 1024*256;
+int main(int argc, char *argv[]) {
+    const size_t NumFunctions = strtoul(argv[1], nullptr, 0);
+    const size_t NumIterations = strtoul(argv[2], nullptr, 0);
 
-    std::array<std::unique_ptr<Base>, NumFunctions> virtuals;
-    std::array<uint32_t, NumFunctions> concretes;
+    std::vector<std::unique_ptr<Base>> virtuals;
+    std::vector<uint32_t> concretes;
 
     std::random_device os_seed;
     const uint32_t seed = os_seed();
@@ -89,10 +91,12 @@ int main() {
     std::uniform_int_distribution< uint32_t > distribute( 0, 15 );
 
     for( unsigned i=0; i<NumFunctions; ++i ) {
-        concretes.at(i) = distribute(generator);
-        virtuals.at(i) = alloc( concretes.at(i) );
+        uint32_t random = distribute(generator);
+        concretes.push_back( random );
+        virtuals.push_back( alloc( random ) );
     }
 
+    std::cerr<<"Starting virtual run\n";
     uint64_t res1 = 0;
     Timepoint start = Clock::now();
     for( unsigned i=0; i<NumIterations; ++i ) {
@@ -104,6 +108,7 @@ int main() {
 
     Duration virt_run = end-start;
 
+    std::cerr<<"Starting concrete run\n";
     uint64_t res2 = 0;
     start = Clock::now();
     for( unsigned i=0; i<NumIterations; ++i ) {
@@ -133,6 +138,13 @@ int main() {
     
     Duration conc_run = end-start;
 
+    /*
     std::cout<<"Virtual returned "<<res1<<", ran for "<<virt_run<<"\n";
     std::cout<<"Concrete returned "<<res2<<", ran for "<<conc_run<<"\n";
+    std::cout<<"Virtual is "<<((static_cast<double>(virt_run.count()) / conc_run.count()) * 100 - 100)<<"% slower\n";
+    */
+
+    std::cout<<
+            res1<<","<<std::chrono::duration_cast<std::chrono::nanoseconds>(virt_run).count()<<","<<
+            res2<<","<<std::chrono::duration_cast<std::chrono::nanoseconds>(conc_run).count()<<"\n";
 }
