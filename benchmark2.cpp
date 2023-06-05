@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
     Duration virt_dur = Duration::max(), conc_dur = Duration::max();
     bool res_v, res_c;
 
-    for( int i=0; i<100; ++i ) {
+    for( int i=0; i<10; ++i ) {
 
         std::cerr<<"Virtual run\n";
 
