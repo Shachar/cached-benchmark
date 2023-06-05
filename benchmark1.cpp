@@ -145,6 +145,7 @@ int main(int argc, char *argv[]) {
     */
 
     std::cout<<
+            NumIterations<<","<<NumFunctions<<","<<
             res1<<","<<std::chrono::duration_cast<std::chrono::nanoseconds>(virt_run).count()<<","<<
             res2<<","<<std::chrono::duration_cast<std::chrono::nanoseconds>(conc_run).count()<<"\n";
 }
