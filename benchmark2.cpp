@@ -47,7 +47,24 @@ void check_error(int res, const char *op) {
     }
 }
 
+template<typename T, size_t Step>
+bool calc_run(size_t size, const char *ptr) {
+    bool res = false;
+
+    T runner_c;
+
+    while(size>0) {
+        size_t chunk = std::min(Step, size);
+        res = runner_c.run(ptr, chunk);
+        ptr += chunk;
+        size -= chunk;
+    }
+
+    return res;
+}
+
 int main(int argc, char *argv[]) {
+    constexpr size_t Step = 256;
     int fd = open(argv[1], O_RDONLY);
     check_error(fd, "open");
     struct stat status;
@@ -63,14 +80,19 @@ int main(int argc, char *argv[]) {
 
         std::cerr<<"Virtual run\n";
 
-        BaseRunner *runner_v = new Runner1;
+        BaseRunner *runner_v;
+        if( status.st_size&16 )
+            runner_v = new Runner1;
+        else
+            runner_v = new Runner2;
+
         res_v = false;
         ptr = map;
         size = status.st_size;
 
         start = Clock::now();
         while(size>0) {
-            size_t chunk = std::min<size_t>(255, size);
+            size_t chunk = std::min<size_t>(Step, size);
             res_v = runner_v->run(ptr, chunk);
             ptr += chunk;
             size -= chunk;
@@ -82,16 +104,13 @@ int main(int argc, char *argv[]) {
 
         size = status.st_size;
         ptr = map;
-        Runner1 runner_c;
         res_c = false;
 
         start = Clock::now();
-        while(size>0) {
-            size_t chunk = std::min<size_t>(255, size);
-            res_c = runner_c.run(ptr, chunk);
-            ptr += chunk;
-            size -= chunk;
-        }
+        if( status.st_size&16 )
+            res_c = calc_run<Runner1, Step>(size, ptr);
+        else
+            res_c = calc_run<Runner2, Step>(size, ptr);
         end = Clock::now();
 
         conc_dur = end-start;
