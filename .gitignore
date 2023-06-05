@@ -5,3 +5,5 @@ benchmark
 parameters.mk
 /funcref.cpp
 /function.h
+/benchmark1
+/benchmark2
