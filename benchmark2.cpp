@@ -73,10 +73,10 @@ int main(int argc, char *argv[]) {
     const char *map = (const char *)mmap(nullptr, size, PROT_READ, MAP_SHARED|MAP_POPULATE|MAP_LOCKED, fd, 0);
     const char *ptr;
     Timepoint start, end;
-    Duration virt_dur, conc_dur;
+    Duration virt_dur = Duration::max(), conc_dur = Duration::max();
     bool res_v, res_c;
 
-    for( int i=0; i<3; ++i ) {
+    for( int i=0; i<100; ++i ) {
 
         std::cerr<<"Virtual run\n";
 
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
             size -= chunk;
         }
         end = Clock::now();
-        virt_dur = end-start;
+        virt_dur = std::min( end-start, virt_dur );
 
         std::cerr<<"Concrete run\n";
 
@@ -113,11 +113,11 @@ int main(int argc, char *argv[]) {
             res_c = calc_run<Runner2, Step>(size, ptr);
         end = Clock::now();
 
-        conc_dur = end-start;
+        conc_dur = std::min( end-start, conc_dur );
     }
     
     std::cout<<
             "Virtual run took "<<virt_dur<<" resulting in "<<res_v<<
             ", concrete run took "<<conc_dur<<" resulting in "<<res_c<<
-            ". Virtual ran "<<( double(std::chrono::duration_cast<std::chrono::nanoseconds>(virt_dur).count()) / std::chrono::duration_cast<std::chrono::nanoseconds>(conc_dur).count() * 100 - 100 )<<"% slower\n";
+            ". Virtual ran "<<( double(virt_dur.count()) / conc_dur.count() * 100 - 100 )<<"% slower\n";
 }
