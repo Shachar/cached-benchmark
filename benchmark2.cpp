@@ -77,9 +77,6 @@ int main(int argc, char *argv[]) {
     bool res_v, res_c;
 
     for( int i=0; i<10; ++i ) {
-
-        std::cerr<<"Virtual run\n";
-
         BaseRunner *runner_v;
         if( status.st_size&16 )
             runner_v = new Runner1;
@@ -99,8 +96,6 @@ int main(int argc, char *argv[]) {
         }
         end = Clock::now();
         virt_dur = std::min( end-start, virt_dur );
-
-        std::cerr<<"Concrete run\n";
 
         size = status.st_size;
         ptr = map;

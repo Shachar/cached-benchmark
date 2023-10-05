@@ -8,6 +8,7 @@
 class Base {
 public:
     virtual uint64_t method(uint64_t num) = 0;
+    virtual ~Base() {}
 };
 
 constexpr uint64_t values[16] = { 0x3d, 0x2f, 0x09, 0xf5, 0xeb, 0xdf, 0xe9, 0x6a, 0x7d, 0xa4, 0x94, 0x66, 0x35, 0x65, 0x9c, 0x27  };
@@ -78,6 +79,11 @@ std::unique_ptr<Base> alloc( uint32_t type ) {
 }
 
 int main(int argc, char *argv[]) {
+    if( argc<3 ) {
+        std::cerr<<"Usage: benchmark1 NumFunctions NumIterations\n";
+
+        return 1;
+    }
     const size_t NumFunctions = strtoul(argv[1], nullptr, 0);
     const size_t NumIterations = strtoul(argv[2], nullptr, 0);
 

@@ -7,7 +7,14 @@ CC=$(CXX)
 
 include parameters.mk
 
-all: benchmark1 benchmark2
+all: benchmark1 benchmark2 benchmark0
+
+benchmark0: benchmark0_1.o benchmark0_2.o
+	$(CXX) $^ -o $@
+
+benchmark0_1.o: benchmark0_1.cpp
+benchmark0_2.o: benchmark0_2.cpp
+benchmark0_1.o benchmark0_2.o: benchmark0.h
 
 benchmark: benchmark.o funcref.o
 
