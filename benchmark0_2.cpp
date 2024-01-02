@@ -4,25 +4,26 @@
 
 void benchmark(Base *b, size_t num_iterations) {
     // Populate cache
-    b->concrete();
-    b->virt();
+    auto result = b->concrete();
 
     auto start = Clock::now();
     for( size_t i=0; i<num_iterations; ++i ) {
-        b->concrete();
+        result ^= b->concrete();
     }
     auto end = Clock::now();
 
+    std::cout<<"Interim value 1: "<<result<<"\n";
     auto concrete_duration = end-start;
 
+    result = b->virt();
     start = Clock::now();
     for( size_t i=0; i<num_iterations; ++i ) {
-        b->virt();
+        result ^= b->virt();
     }
     end = Clock::now();
 
+    std::cout<<"Interim value 2: "<<result<<"\n";
     auto virt_duration = end-start;
-
 
     std::cout<<"Concrete duration: "<<concrete_duration<<"\n";
     std::cout<<"Virtual duration: "<<virt_duration<<"\n";

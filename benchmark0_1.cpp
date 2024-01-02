@@ -11,5 +11,5 @@ int Base::virt() const {
 int main() {
     Base b;
 
-    benchmark(&b, 1000000);
+    benchmark(&b, 10000000);
 }
